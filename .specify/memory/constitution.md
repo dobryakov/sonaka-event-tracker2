@@ -1,50 +1,46 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Sonaka Event Tracker Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Назначение системы
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+Сервис предназначен для **трекинга событий**, которые отправляют **внешние клиенты**. Любая новая функциональность должна явно обслуживать приём, хранение или проверку таких событий; отклонения от этой цели требуют обоснования и фиксации в спецификации.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### II. Контейнерная архитектура (docker compose)
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+Проект **собирается и запускается** как набор сервисов под **docker compose**:
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+- контейнер с **PostgreSQL**;
+- контейнер с **приложением на Go**;
+- контейнер с **клиентами на PHP и bash (curl)**.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+Разработка и проверка должны опираться на этот состав сервисов; добавление сервисов или смена СУБД оформляются как изменение конституции/спека и инфраструктуры.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### III. Исполнение только в контейнерах
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+**Все** команды сборки, запуска, миграций, клиентов и тестов выполняются **внутри контейнеров** через **docker compose** (в т.ч. `docker compose exec` там, где это принято в проекте). Запуск тех же задач **на хосте** как основной способ работы не допускается, кроме случаев, явно описанных в документации проекта (например, только установка Docker).
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### IV. Автотестирование (обязательное)
+
+**Автотесты** являются частью определения готовности задачи: после завершения каждой задачи автотесты **должны быть актуальны и успешно прогоняться** в контейнерной среде. Слияние/завершение работы без зелёных автотестов не считается выполнением задачи, если только специально не зафиксировано иное с обоснованием.
+
+### V. Конфигурация через `.env` и Compose
+
+Параметры окружения (подключение к БД, порты, URL сервисов, секреты и прочее, зависящее от среды) задаются в **файле `.env`** у проекта. Секреты и локальные значения **не коммитятся**; в репозитории поддерживается **`.env.example`** с перечнем переменных и безопасными примерами.
+
+В **`docker-compose.yml`** эта конфигурация **обязательно прокидывается в контейнеры**: через `env_file`, блок `environment` с подстановкой из переменных окружения Compose или эквивалентный согласованный способ. Учётные данные и адреса зависимых сервисов **не хардкодятся** в образах или в compose так, чтобы их нельзя было переопределить через `.env`, кроме явно описанных несекретных значений по умолчанию для локальной разработки.
+
+## Технологический контур
+
+Стек по умолчанию: **Go** (серверное приложение), **PostgreSQL** (данные), **PHP и bash** (клиенты и вспомогательные сценарии). Выбор инструментов вне этого контура — только через осознанное изменение проектных правил и инфраструктуры.
+
+## Рабочий процесс
+
+- Любая задача завершается проверкой через **docker compose** и **автотесты**.
+- Документация по установке, первому запуску и примерам команд должна соответствовать контейнерной модели (см. требования проекта в `prompt.txt` и README).
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+Настоящая конституция **имеет приоритет** над соглашениями «словесно» или в устаревших фрагментах кода, если между ними есть конфликт. Изменения конституции: версия внизу файла, краткое описание причины; при существенных изменениях — синхронизация с `.cursor/rules` и пользовательской документацией.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.1.0 | **Ratified**: 2026-04-15 | **Last Amended**: 2026-04-15
