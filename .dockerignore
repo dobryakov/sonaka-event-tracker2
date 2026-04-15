@@ -1,0 +1,12 @@
+.git
+.cursor
+.vscode
+.env
+*.md
+specs/
+.specify/
+prompt.txt
+**/*.test
+**/*.out
+server/bin/
+.cache/

@@ -1,0 +1,83 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      HTTP_ADDR: ${HTTP_ADDR:-:8080}
+      MAX_BODY_BYTES: ${MAX_BODY_BYTES:-1048576}
+      MIGRATIONS_DIR: ${MIGRATIONS_DIR:-/app/migrations}
+      ALLOW_DB_FAILURE_SIMULATION: ${ALLOW_DB_FAILURE_SIMULATION:-true}
+    ports:
+      - "${APP_PUBLISH_PORT:-8080}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O- http://127.0.0.1:8080/health >/dev/null || exit 1",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  # Клиенты: не поднимаются вместе с `docker compose up` (profile client).
+  # Разовый запуск: docker compose run --rm client-php … / client-bash …
+  client-php:
+    profiles: [client]
+    build:
+      context: .
+      dockerfile: Dockerfile.client-php
+    environment:
+      INGEST_BASE_URL: ${INGEST_BASE_URL}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      ALLOW_DB_FAILURE_SIMULATION: ${ALLOW_DB_FAILURE_SIMULATION:-true}
+    depends_on:
+      app:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    command: ["true"]
+
+  client-bash:
+    profiles: [client]
+    build:
+      context: .
+      dockerfile: Dockerfile.client-bash
+    environment:
+      INGEST_BASE_URL: ${INGEST_BASE_URL}
+    depends_on:
+      app:
+        condition: service_healthy
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    command: ["true"]
+
+volumes:
+  postgres_data:

@@ -3,3 +3,9 @@
 .env
 .cache/
 server/bin/
+*.exe
+*.test
+*.out
+vendor/
+coverage/
+

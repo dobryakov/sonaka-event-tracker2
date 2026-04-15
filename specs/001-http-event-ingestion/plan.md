@@ -8,14 +8,14 @@
 
 ## Summary
 
-Реализовать сервис приёмки событий по **HTTP** с телом **JSON** (`Content-Type: application/json`), сохранением в **PostgreSQL** и ответом **2xx** с **`id`** записи. Клиентские примеры на **PHP 8.3+** и **bash (curl)** запускаются через **`docker compose exec`**. Интеграционные **автотесты на PHP** выполняются в контейнере **`client-php`**: POST к приёмке и проверка строки в БД по `id` через SQL. Конфигурация через **`.env`** и **Compose**. Технический подход: Go 1.22+ (`net/http`, `database/sql`), драйвер **pgx** (stdlib), миграции **golang-migrate**, контракт API в OpenAPI (см. `contracts/`). Детали и обоснования — в [research.md](./research.md).
+Реализовать сервис приёмки событий по **HTTP** с телом **JSON** (`Content-Type: application/json`), сохранением в **PostgreSQL** и ответом **2xx** с **`id`** записи. Клиентские примеры на **PHP 8.3+** и **bash (curl)** запускаются разово через **`docker compose run --rm`**. Интеграционные **автотесты на PHP** выполняются одноразовым контейнером **`client-php`**: POST к приёмке и проверка строки в БД по `id` через SQL. Конфигурация через **`.env`** и **Compose**. Технический подход: Go 1.22+ (`net/http`, `database/sql`), драйвер **pgx** (stdlib), миграции **golang-migrate**, контракт API в OpenAPI (см. `contracts/`). Детали и обоснования — в [research.md](./research.md).
 
 ## Technical Context
 
 **Language/Version**: Go 1.22+ (сервер приложения); PHP 8.3+ (пример клиента); bash для curl-сценариев  
 **Primary Dependencies**: `net/http`, `database/sql`, `github.com/jackc/pgx/v5/stdlib`, `github.com/golang-migrate/migrate/v4`  
 **Storage**: PostgreSQL (единственное постоянное хранилище событий в объёме фичи)  
-**Testing**: PHP-скрипты в `clients/php/tests/`, запуск в сервисе `client-php` (`docker compose exec`): HTTP POST к `app` и проверка строки в PostgreSQL по `id`  
+**Testing**: PHP-скрипты в `clients/php/tests/`, разовый запуск `docker compose run --rm client-php`: HTTP POST к `app` и проверка строки в PostgreSQL по `id`  
 **Target Platform**: Linux-контейнеры под docker compose  
 **Project Type**: web-service (HTTP ingestion) + контейнерные клиенты и тесты  
 **Performance Goals**: не формализованы сверх спека; SC-001 (запись видна в БД в течение 5 с после успешного ответа)  
@@ -30,7 +30,7 @@
 |--------|--------|----------|
 | I. Назначение — приём/хранение/проверка событий | PASS | Фича целиком про HTTP-приём и запись в PostgreSQL |
 | II. Docker compose: PostgreSQL, Go, PHP и bash | PASS | План и quickstart предполагают сервисы `postgres`, приложение Go, контейнеры/образы для PHP и bash-клиентов |
-| III. Команды только в контейнерах | PASS | Документация и тесты — через `docker compose exec` |
+| III. Команды только в контейнерах | PASS | Документация и тесты — через `docker compose` (`run --rm` для клиентов, при необходимости `exec` для уже поднятых сервисов) |
 | IV. Автотесты обязательны | PASS | Интеграционные тесты PHP в `client-php` + проверка БД по FR-005 |
 | V. `.env` + прокидывание в compose | PASS | research и quickstart задают DATABASE_URL/DB_* и HTTP_ADDR из `.env` |
 

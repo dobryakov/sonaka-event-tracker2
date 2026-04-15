@@ -27,8 +27,8 @@ description: "Очередь задач по фиче HTTP-приёмка соб
 
 **Цель**: каркас репозитория и Go-модуль.
 
-- [ ] T001 Создать каталоги `src/cmd/server/`, `src/internal/api/`, `src/internal/config/`, `src/internal/storage/`, `migrations/`, `clients/php/tests/`, `clients/bash/` по структуре из specs/001-http-event-ingestion/plan.md
-- [ ] T002 Инициализировать Go-модуль в корне репозитория (`go.mod`, `go.sum`, версия Go 1.22+) с зависимостями `github.com/jackc/pgx/v5`, `github.com/jackc/pgx/v5/stdlib`, `github.com/golang-migrate/migrate/v4` и драйвером/source для PostgreSQL и файловых миграций
+- [x] T001 Создать каталоги `src/cmd/server/`, `src/internal/api/`, `src/internal/config/`, `src/internal/storage/`, `migrations/`, `clients/php/tests/`, `clients/bash/` по структуре из specs/001-http-event-ingestion/plan.md
+- [x] T002 Инициализировать Go-модуль в корне репозитория (`go.mod`, `go.sum`, версия Go 1.22+) с зависимостями `github.com/jackc/pgx/v5`, `github.com/jackc/pgx/v5/stdlib`, `github.com/golang-migrate/migrate/v4` и драйвером/source для PostgreSQL и файловых миграций
 
 ---
 
@@ -38,14 +38,14 @@ description: "Очередь задач по фиче HTTP-приёмка соб
 
 **Важно**: работу по US1–US3 не начинать до завершения этой фазы.
 
-- [ ] T003 [P] Добавить SQL-миграции `migrations/000001_create_events.up.sql` и `migrations/000001_create_events.down.sql`: таблица `events` со столбцами из specs/001-http-event-ingestion/data-model.md (`id BIGSERIAL`, `system_name`, `object_id`, `event_name`, `metadata JSONB`, `event_time TIMESTAMPTZ`)
-- [ ] T004 [P] Создать `.env.example` в корне с переменными для PostgreSQL, приложения и PHP-тестов (`POSTGRES_*`, `DATABASE_URL` или `DB_HOST`/`DB_PORT`/`DB_USER`/`DB_PASSWORD`/`DB_NAME`, `HTTP_ADDR`, базовый URL приёмки для клиентов например `APP_URL` или `INGEST_BASE_URL`) по specs/001-http-event-ingestion/research.md и specs/001-http-event-ingestion/quickstart.md
-- [ ] T005 Реализовать загрузку конфигурации из окружения в `src/internal/config/config.go` (включая лимит тела запроса 1 MiB или переопределение через env, согласованное с research.md)
-- [ ] T006 Добавить `Dockerfile` для сборки и запуска бинарника из `src/cmd/server/main.go` (multi-stage по усмотрению)
-- [ ] T007 Добавить `docker-compose.yml` в корне: сервисы `postgres` (с healthcheck), `app` (Go), `client-php` (образ с `pdo_pgsql` или эквивалентом для SQL из тестов), `client-bash`; прокинуть переменные из `.env` в контейнеры по specs/001-http-event-ingestion/plan.md
-- [ ] T008 Реализовать `src/internal/storage/event_repository.go`: вставка события через `database/sql`, возврат сгенерированного `id` (`BIGSERIAL`)
-- [ ] T009 В `src/cmd/server/main.go` подключить драйвер pgx stdlib, открыть пул `*sql.DB`, при старте применить миграции из каталога `migrations/` через golang-migrate до начала обслуживания HTTP
-- [ ] T010 В `src/cmd/server/main.go` поднять HTTP-сервер на адресе из конфигурации и корректно завершать работу по сигналу (graceful shutdown)
+- [x] T003 [P] Добавить SQL-миграции `migrations/000001_create_events.up.sql` и `migrations/000001_create_events.down.sql`: таблица `events` со столбцами из specs/001-http-event-ingestion/data-model.md (`id BIGSERIAL`, `system_name`, `object_id`, `event_name`, `metadata JSONB`, `event_time TIMESTAMPTZ`)
+- [x] T004 [P] Создать `.env.example` в корне с переменными для PostgreSQL, приложения и PHP-тестов (`POSTGRES_*`, `DATABASE_URL` или `DB_HOST`/`DB_PORT`/`DB_USER`/`DB_PASSWORD`/`DB_NAME`, `HTTP_ADDR`, базовый URL приёмки для клиентов например `APP_URL` или `INGEST_BASE_URL`) по specs/001-http-event-ingestion/research.md и specs/001-http-event-ingestion/quickstart.md
+- [x] T005 Реализовать загрузку конфигурации из окружения в `src/internal/config/config.go` (включая лимит тела запроса 1 MiB или переопределение через env, согласованное с research.md)
+- [x] T006 Добавить `Dockerfile` для сборки и запуска бинарника из `src/cmd/server/main.go` (multi-stage по усмотрению)
+- [x] T007 Добавить `docker-compose.yml` в корне: сервисы `postgres` (с healthcheck), `app` (Go), `client-php` (образ с `pdo_pgsql` или эквивалентом для SQL из тестов), `client-bash`; прокинуть переменные из `.env` в контейнеры по specs/001-http-event-ingestion/plan.md
+- [x] T008 Реализовать `src/internal/storage/event_repository.go`: вставка события через `database/sql`, возврат сгенерированного `id` (`BIGSERIAL`)
+- [x] T009 В `src/cmd/server/main.go` подключить драйвер pgx stdlib, открыть пул `*sql.DB`, при старте применить миграции из каталога `migrations/` через golang-migrate до начала обслуживания HTTP
+- [x] T010 В `src/cmd/server/main.go` поднять HTTP-сервер на адресе из конфигурации и корректно завершать работу по сигналу (graceful shutdown)
 
 **Контрольная точка**: приложение стартует, миграции применены, БД доступна — можно реализовывать приёмку событий.
 
@@ -59,11 +59,11 @@ description: "Очередь задач по фиче HTTP-приёмка соб
 
 ### Реализация (US1)
 
-- [ ] T011 [US1] Реализовать обработчик POST `/events` в `src/internal/api/ingest.go`: ограничение размера тела 1 MiB (`http.MaxBytesReader`), отказ при неверном `Content-Type` или невалидном JSON с телом ошибки по контракту в specs/001-http-event-ingestion/contracts/http-event-ingestion.openapi.yaml
-- [ ] T012 [US1] В `src/internal/api/ingest.go` проверить обязательные поля и форму `metadata` (только JSON-объект или JSON-массив на верхнем уровне) по specs/001-http-event-ingestion/data-model.md; при нарушении — 400 с машиночитаемым `error` (research.md)
-- [ ] T013 [US1] В `src/internal/api/ingest.go` разобрать `event_time` (RFC 3339 / ISO 8601); при неуспехе — использовать время приёма на сервере (UTC); сохранить `TIMESTAMPTZ` согласно specs/001-http-event-ingestion/spec.md (Assumptions)
-- [ ] T014 [US1] Связать обработчик с `event_repository`: при успехе вернуть 200 или 201 и JSON `{"id": <int64>}`; при недоступности БД/ошибке записи — 503/500 и JSON ошибки по research.md
-- [ ] T015 [US1] Зарегистрировать маршрут `POST /events` в `src/cmd/server/main.go` (например `http.ServeMux`)
+- [x] T011 [US1] Реализовать обработчик POST `/events` в `src/internal/api/ingest.go`: ограничение размера тела 1 MiB (`http.MaxBytesReader`), отказ при неверном `Content-Type` или невалидном JSON с телом ошибки по контракту в specs/001-http-event-ingestion/contracts/http-event-ingestion.openapi.yaml
+- [x] T012 [US1] В `src/internal/api/ingest.go` проверить обязательные поля и форму `metadata` (только JSON-объект или JSON-массив на верхнем уровне) по specs/001-http-event-ingestion/data-model.md; при нарушении — 400 с машиночитаемым `error` (research.md)
+- [x] T013 [US1] В `src/internal/api/ingest.go` разобрать `event_time` (RFC 3339 / ISO 8601); при неуспехе — использовать время приёма на сервере (UTC); сохранить `TIMESTAMPTZ` согласно specs/001-http-event-ingestion/spec.md (Assumptions)
+- [x] T014 [US1] Связать обработчик с `event_repository`: при успехе вернуть 200 или 201 и JSON `{"id": <int64>}`; при недоступности БД/ошибке записи — 503/500 и JSON ошибки по research.md
+- [x] T015 [US1] Зарегистрировать маршрут `POST /events` в `src/cmd/server/main.go` (например `http.ServeMux`)
 
 **Контрольная точка**: US1 функционально завершена (ручная проверка curl или временный вызов).
 
@@ -73,16 +73,16 @@ description: "Очередь задач по фиче HTTP-приёмка соб
 
 **Цель**: автоматическая отправка события и проверка строки в PostgreSQL по `id` без ручных шагов.
 
-**Независимая проверка**: `docker compose exec client-php php clients/php/tests/run_integration_tests.php` (или эквивалент из quickstart) завершается кодом 0 или явным сообщением об ошибке.
+**Независимая проверка**: `docker compose run --rm client-php php clients/php/tests/run_integration_tests.php` (или эквивалент из quickstart) завершается кодом 0 или явным сообщением об ошибке.
 
 ### Тесты (US2)
 
-- [ ] T016 [P] [US2] В `clients/php/tests/`: сценарий успешного POST с заранее заданным телом → разбор JSON с `id` → `SELECT` в PostgreSQL через PDO → сравнение `system_name`, `object_id`, `event_name`, `metadata`, `event_time` с нормализацией времени к UTC (FR-005); при проверке SC-001 убедиться, что строка в БД читается не позднее 5 с после успешного ответа приёмки (достаточно одного измерения в этом сценарии)
-- [ ] T017 [P] [US2] В `clients/php/tests/`: два эквивалентных POST подряд → два разных `id`, две строки в БД (сценарий повторной доставки из specs/001-http-event-ingestion/spec.md)
-- [ ] T018 [P] [US2] В `clients/php/tests/`: сценарии 400 (отсутствует обязательное поле, неверная форма `metadata`, неверный `Content-Type`, невалидный JSON) и 413 (тело больше лимита) согласно specs/001-http-event-ingestion/spec.md Edge Cases и research.md
-- [ ] T026 [P] [US2] В `clients/php/tests/`: сценарий с заведомо невалидной строкой `event_time` (не RFC 3339 / ISO 8601) при прочих валидных полях → ответ 2xx и JSON с `id`; в БД у сохранённой строки `event_time` соответствует времени приёма на сервере (UTC), с допуском на часы/сетевую задержку по сравнению с меткой «до POST» и «после POST» (spec.md Edge Cases и Assumptions)
-- [ ] T027 [P] [US2] В `clients/php/tests/` или согласованном шаге прогона: сценарий «хранилище недоступно / ошибка записи» — при остановленном `postgres` (или эквивалентной имитации недоступности) валидный POST возвращает 503 или 500 с телом ошибки по specs/001-http-event-ingestion/contracts/http-event-ingestion.openapi.yaml и research.md, запись с этим ответом не считается принятой; после восстановления сервиса приёмка снова успешна. Если автоматизация остановки сервиса в CI нежелательна — зафиксировать воспроизводимый ручной сценарий в quickstart и оставить в автотестах минимум проверку кода ошибки через тестовый переключатель в приложении (только для тестов), явно описанный в research/quickstart
-- [ ] T019 [US2] Добавить точку входа `clients/php/tests/run_integration_tests.php`, последовательно вызывающую сценарии T016–T018 и T026–T027 и завершающую процесс с ненулевым кодом при любом падении; синхронизировать команду запуска с specs/001-http-event-ingestion/quickstart.md (`docker compose exec client-php ...`)
+- [x] T016 [P] [US2] В `clients/php/tests/`: сценарий успешного POST с заранее заданным телом → разбор JSON с `id` → `SELECT` в PostgreSQL через PDO → сравнение `system_name`, `object_id`, `event_name`, `metadata`, `event_time` с нормализацией времени к UTC (FR-005); при проверке SC-001 убедиться, что строка в БД читается не позднее 5 с после успешного ответа приёмки (достаточно одного измерения в этом сценарии)
+- [x] T017 [P] [US2] В `clients/php/tests/`: два эквивалентных POST подряд → два разных `id`, две строки в БД (сценарий повторной доставки из specs/001-http-event-ingestion/spec.md)
+- [x] T018 [P] [US2] В `clients/php/tests/`: сценарии 400 (отсутствует обязательное поле, неверная форма `metadata`, неверный `Content-Type`, невалидный JSON) и 413 (тело больше лимита) согласно specs/001-http-event-ingestion/spec.md Edge Cases и research.md
+- [x] T026 [P] [US2] В `clients/php/tests/`: сценарий с заведомо невалидной строкой `event_time` (не RFC 3339 / ISO 8601) при прочих валидных полях → ответ 2xx и JSON с `id`; в БД у сохранённой строки `event_time` соответствует времени приёма на сервере (UTC), с допуском на часы/сетевую задержку по сравнению с меткой «до POST» и «после POST» (spec.md Edge Cases и Assumptions)
+- [x] T027 [P] [US2] В `clients/php/tests/` или согласованном шаге прогона: сценарий «хранилище недоступно / ошибка записи» — при остановленном `postgres` (или эквивалентной имитации недоступности) валидный POST возвращает 503 или 500 с телом ошибки по specs/001-http-event-ingestion/contracts/http-event-ingestion.openapi.yaml и research.md, запись с этим ответом не считается принятой; после восстановления сервиса приёмка снова успешна. Если автоматизация остановки сервиса в CI нежелательна — зафиксировать воспроизводимый ручной сценарий в quickstart и оставить в автотестах минимум проверку кода ошибки через тестовый переключатель в приложении (только для тестов), явно описанный в research/quickstart
+- [x] T019 [US2] Добавить точку входа `clients/php/tests/run_integration_tests.php`, последовательно вызывающую сценарии T016–T018 и T026–T027 и завершающую процесс с ненулевым кодом при любом падении; синхронизировать команду запуска с specs/001-http-event-ingestion/quickstart.md (`docker compose run --rm client-php ...`)
 
 **Контрольная точка**: регрессия приёмки и персистентности ловится автотестами.
 
@@ -90,15 +90,15 @@ description: "Очередь задач по фиче HTTP-приёмка соб
 
 ## Фаза 5: User Story 3 — Быстрый старт (P3)
 
-**Цель**: документация и примеры клиентов с `docker compose exec`, псевдослучайные данные, воспроизводимые команды.
+**Цель**: документация и примеры клиентов с `docker compose run --rm`, псевдослучайные данные, воспроизводимые команды.
 
 **Независимая проверка**: новый участник по документу поднимает окружение и отправляет событие без недекларированных шагов (SC-002, SC-004, FR-006).
 
 ### Реализация (US3)
 
-- [ ] T020 [P] [US3] Реализовать `clients/bash/send_event.sh`: сформировать JSON с полями из FR-009, псевдослучайные `object_id`/фрагменты `metadata`, `curl` с `Content-Type: application/json`, завершение с ненулевым кодом при ошибке HTTP
-- [ ] T021 [P] [US3] Реализовать `clients/php/send_event.php`: эквивалентная отправка (например `curl` в PHP или HTTP-клиент образа), псевдослучайные значения, завершение процесса после ответа
-- [ ] T022 [US3] Привести `specs/001-http-event-ingestion/quickstart.md` в соответствие с реализованными именами сервисов Docker Compose, путями к скриптам и командами автотестов; включить разделы: установка и первый запуск, примеры клиентов, запуск автотестов (FR-006). При необходимости для входа с корня репозитория добавить или обновить корневой `README.md` со ссылкой на этот quickstart и на конституцию/compose
+- [x] T020 [P] [US3] Реализовать `clients/bash/send_event.sh`: сформировать JSON с полями из FR-009, псевдослучайные `object_id`/фрагменты `metadata`, `curl` с `Content-Type: application/json`, завершение с ненулевым кодом при ошибке HTTP
+- [x] T021 [P] [US3] Реализовать `clients/php/send_event.php`: эквивалентная отправка (например `curl` в PHP или HTTP-клиент образа), псевдослучайные значения, завершение процесса после ответа
+- [x] T022 [US3] Привести `specs/001-http-event-ingestion/quickstart.md` в соответствие с реализованными именами сервисов Docker Compose, путями к скриптам и командами автотестов; включить разделы: установка и первый запуск, примеры клиентов, запуск автотестов (FR-006). При необходимости для входа с корня репозитория добавить или обновить корневой `README.md` со ссылкой на этот quickstart и на конституцию/compose
 
 **Контрольная точка**: quickstart полностью исполним без догадок.
 
@@ -108,9 +108,9 @@ description: "Очередь задач по фиче HTTP-приёмка соб
 
 **Цель**: устойчивость в compose, соответствие контракту и операционная готовность.
 
-- [ ] T023 [P] Добавить лёгкий `GET /health` или `/healthz` в `src/internal/api/health.go` и зарегистрировать в `src/cmd/server/main.go` для проверок готовности (по желанию из specs/001-http-event-ingestion/research.md)
-- [ ] T024 [P] Настроить в `docker-compose.yml` зависимость `app` от здорового `postgres` (и при необходимости healthcheck для `app`)
-- [ ] T025 Провести сквозную проверку сценариев из `specs/001-http-event-ingestion/quickstart.md` и устранить расхождения с кодом и compose
+- [x] T023 [P] Добавить лёгкий `GET /health` или `/healthz` в `src/internal/api/health.go` и зарегистрировать в `src/cmd/server/main.go` для проверок готовности (по желанию из specs/001-http-event-ingestion/research.md)
+- [x] T024 [P] Настроить в `docker-compose.yml` зависимость `app` от здорового `postgres` (и при необходимости healthcheck для `app`)
+- [x] T025 Провести сквозную проверку сценариев из `specs/001-http-event-ingestion/quickstart.md` и устранить расхождения с кодом и compose
 
 ---
 
