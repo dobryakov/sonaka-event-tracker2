@@ -1,0 +1,141 @@
+openapi: 3.1.0
+info:
+  title: Sonaka Event Tracker — приёмка событий
+  version: 0.1.0
+  description: |
+    HTTP-интерфейс приёмки событий (фича 001-http-event-ingestion).
+    Без аутентификации в объёме фичи; контур доверия — сеть развёртывания.
+
+servers:
+  - url: http://app:8080
+    description: Внутри docker compose (пример; фактический host/port из .env)
+
+paths:
+  /events:
+    post:
+      operationId: ingestEvent
+      summary: Принять и сохранить событие
+      description: |
+        Тело — один JSON-объект (FR-009). Успех — 2xx и JSON с `id` первичного ключа в PostgreSQL (FR-010).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventIngestRequest'
+            examples:
+              minimal:
+                summary: Минимально допустимый пример
+                value:
+                  system_name: billing
+                  object_id: inv-1001
+                  event_name: InvoicePaid
+                  event_time: "2026-04-15T12:34:56Z"
+                  metadata:
+                    amount_cents: 9999
+                    currency: EUR
+      responses:
+        '200':
+          description: Событие успешно сохранено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventIngestSuccess'
+        '201':
+          description: Событие успешно создано (если реализация выберет 201)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventIngestSuccess'
+        '400':
+          description: Ошибка клиента (валидация, неверный Content-Type, невалидный JSON, неверная форма metadata)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '413':
+          description: Превышен максимальный размер тела запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Хранилище недоступно или ошибка записи
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    EventIngestRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - system_name
+        - object_id
+        - event_name
+        - event_time
+        - metadata
+      properties:
+        system_name:
+          type: string
+          description: Имя системы-отправителя
+        object_id:
+          type: string
+          description: Идентификатор объекта наблюдения
+        event_name:
+          type: string
+          description: Имя типа или экземпляра события
+        event_time:
+          type: string
+          description: RFC 3339 / ISO 8601; при неразборе сервер использует время приёма (см. спек)
+          examples:
+            - "2026-04-15T12:34:56Z"
+            - "2026-04-15T14:34:56+02:00"
+        metadata:
+          description: JSON-объект или JSON-массив (вложенность допустима)
+          oneOf:
+            - type: object
+            - type: array
+
+    EventIngestSuccess:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Значение первичного ключа сохранённой строки в PostgreSQL
+
+    ErrorEnvelope:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Стабильный машиночитаемый код ошибки
+        message:
+          type: string
+          description: Краткое описание для человека и логов
+        details:
+          type: object
+          additionalProperties: true
+          description: Опционально, например ошибки по полям
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorEnvelope'
