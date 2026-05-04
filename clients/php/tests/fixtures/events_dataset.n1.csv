@@ -1,0 +1,10 @@
+object_id,system_name,event_name,metadata,event_time
+9608db18-3743-4f67-af57-004f3fb0f78a,billing,InvoiceCreated,"{""cycle"":0,""step"":0,""object_id"":""9608db18-3743-4f67-af57-004f3fb0f78a""}",2026-03-30T06:37:23+00:00
+9608db18-3743-4f67-af57-004f3fb0f78a,billing,PaymentCaptured,"{""cycle"":0,""step"":1,""object_id"":""9608db18-3743-4f67-af57-004f3fb0f78a""}",2026-03-30T06:40:52+00:00
+9608db18-3743-4f67-af57-004f3fb0f78a,billing,RefundIssued,"{""cycle"":0,""step"":2,""object_id"":""9608db18-3743-4f67-af57-004f3fb0f78a""}",2026-03-30T06:45:31+00:00
+9608db18-3743-4f67-af57-004f3fb0f78a,inventory,StockAdjusted,"{""cycle"":0,""step"":3,""object_id"":""9608db18-3743-4f67-af57-004f3fb0f78a""}",2026-03-30T06:47:41+00:00
+9608db18-3743-4f67-af57-004f3fb0f78a,inventory,ReorderSuggested,"{""cycle"":0,""step"":4,""object_id"":""9608db18-3743-4f67-af57-004f3fb0f78a""}",2026-03-30T06:51:24+00:00
+9608db18-3743-4f67-af57-004f3fb0f78a,auth,LoginSucceeded,"{""cycle"":0,""step"":5,""object_id"":""9608db18-3743-4f67-af57-004f3fb0f78a""}",2026-03-30T06:53:39+00:00
+9608db18-3743-4f67-af57-004f3fb0f78a,auth,SessionRefreshed,"{""cycle"":0,""step"":6,""object_id"":""9608db18-3743-4f67-af57-004f3fb0f78a""}",2026-03-30T06:57:50+00:00
+9608db18-3743-4f67-af57-004f3fb0f78a,auth,LogoutCompleted,"{""cycle"":0,""step"":7,""object_id"":""9608db18-3743-4f67-af57-004f3fb0f78a""}",2026-03-30T06:58:37+00:00
+9608db18-3743-4f67-af57-004f3fb0f78a,notifications,EmailQueued,"{""cycle"":0,""step"":8,""object_id"":""9608db18-3743-4f67-af57-004f3fb0f78a""}",2026-03-30T07:03:23+00:00
